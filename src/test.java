@@ -25,6 +25,8 @@ public class test extends Application {
 	short min, max; //min/max value in the 3D volume data set
 
 	int currZSlice=128;
+	int currXSlice=128;
+	int currYSlice=128;
 
     @Override
     public void start(Stage stage) throws FileNotFoundException {
@@ -41,9 +43,17 @@ public class test extends Application {
 		//We need 3 things to see an image
 		//1. We need to create the image
 		WritableImage sliceZImage = new WritableImage(256, 256); //allocate memory for the image
+		WritableImage sliceXImage = new WritableImage(256, 256); //allocate memory for the image
+		WritableImage sliceYImage = new WritableImage(256, 256); //allocate memory for the image
+
 		GetZSlice(currZSlice, sliceZImage); //make the image - in this case go get the slice and copy it into the image
+		GetXSlice(currXSlice, sliceXImage);
+		GetYSlice(currYSlice, sliceYImage);
 		//2. We link a view in the GUI to that image
 		ImageView sliceXView = new ImageView(sliceZImage); //and then see 3. below
+		ImageView sliceYView = new ImageView(sliceXImage);
+		ImageView sliceZView = new ImageView(sliceYImage);
+
 
 		// Do the same for MIP
 		WritableImage MIPZImage = new WritableImage(256, 256);
@@ -52,29 +62,60 @@ public class test extends Application {
 
 		//Create the simple GUI
 		Slider sliceZSlider = new Slider(0, 255, currZSlice);
-		
+		Slider sliceXSlider = new Slider(0, 255, currXSlice);
+		Slider sliceYSlider = new Slider(0, 255, currYSlice);
+
+
 		sliceZSlider.valueProperty().addListener(new ChangeListener<Number>() { 
 			public void changed(ObservableValue <? extends Number >  
 					observable, Number oldValue, Number newValue) { 
 
 				currZSlice = newValue.intValue();
-				//System.out.println(currZSlice);
 				//We update our Image
 		        GetZSlice(currZSlice, sliceZImage); //go get the slice image
+
 				//Because sliceZView (an ImageView) is linked to it, this will automatically update the displayed image in the GUI
             } 
-        });		
+        });
+
+		sliceXSlider.valueProperty().addListener(new ChangeListener<Number>() {
+			public void changed(ObservableValue <? extends Number >
+										observable, Number oldValue, Number newValue) {
+
+				currXSlice = newValue.intValue();
+				//We update our Image
+				GetXSlice(currXSlice, sliceXImage);
+				//Because sliceZView (an ImageView) is linked to it, this will automatically update the displayed image in the GUI
+			}
+		});
+
+		sliceYSlider.valueProperty().addListener(new ChangeListener<Number>() {
+			public void changed(ObservableValue <? extends Number >
+										observable, Number oldValue, Number newValue) {
+
+				currYSlice = newValue.intValue();
+				//We update our Image
+				GetYSlice(currYSlice, sliceYImage);
+				//Because sliceZView (an ImageView) is linked to it, this will automatically update the displayed image in the GUI
+			}
+		});
+
 
 		//Add all the GUI elements
 		//I'll start a grid for you
 		GridPane grid = new GridPane();
         grid.add(sliceZSlider, 0, 0); // Slider at column 0, row 0
-        grid.setHgap(10);
+		grid.add(sliceXSlider,2,0);
+		grid.add(sliceYSlider,4,0);
+
+		grid.setHgap(10);
         grid.setVgap(10);
 
         //3. (referring to the 3 things we need to display an image)
       	//we need to add it to the grid
 		grid.add(sliceXView, 0, 1); // Slider at column 0, row 1
+		grid.add(sliceYView,2,1);
+		grid.add(sliceZView,4,1);
 		grid.add(MIPZView, 0, 2); // Slider at column 0, row 1
 		
 
@@ -146,6 +187,55 @@ public class test extends Application {
 				
 				//Apply the new colour
 				image_writer.setColor(x, y, color);
+			}
+		}
+	}
+	// Method to extract a slice along the X-axis
+	public void GetXSlice(int slice, WritableImage image) {
+		// Find the width and height of the image to be processed
+		int width = (int) image.getWidth();
+		int height = (int) image.getHeight();
+		float val;
+
+		// Get an interface to write to that image memory
+		PixelWriter image_writer = image.getPixelWriter();
+
+		// Iterate over all pixels
+		for (int z = 0; z < height; z++) {
+			for (int y = 0; y < width; y++) { // 'z' represents the depth axis here
+				// Extract the value from the grey array at the specified X-slice
+				val = grey[z][y][slice]; // Fixed 'slice' as the X-coordinate
+
+				// Create a grayscale color
+				Color color = Color.color(val, val, val);
+
+				// Apply the new color
+				image_writer.setColor(z, y, color); // Write to the image at (z, y)
+			}
+		}
+	}
+
+	// Method to extract a slice along the X-axis
+	public void GetYSlice(int slice, WritableImage image) {
+		// Find the width and height of the image to be processed
+		int width = (int) image.getWidth();
+		int height = (int) image.getHeight();
+		float val;
+
+		// Get an interface to write to that image memory
+		PixelWriter image_writer = image.getPixelWriter();
+
+		// Iterate over all pixels
+		for (int z = 0; z < height; z++) {
+			for (int x = 0; x < width; x++) { // 'z' represents the depth axis here
+				// Extract the value from the grey array at the specified X-slice
+				val = grey[z][slice][x]; // Fixed 'slice' as the X-coordinate
+
+				// Create a grayscale color
+				Color color = Color.color(val, val, val);
+
+				// Apply the new color
+				image_writer.setColor(z, x, color); // Write to the image at (z, y)
 			}
 		}
 	}

@@ -210,7 +210,7 @@ public class test extends Application {
 				Color color = Color.color(val, val, val);
 
 				// Apply the new color
-				image_writer.setColor(z, y, color); // Write to the image at (z, y)
+				image_writer.setColor(y, z, color); // Write to the image at (z, y)
 			}
 		}
 	}
@@ -235,7 +235,7 @@ public class test extends Application {
 				Color color = Color.color(val, val, val);
 
 				// Apply the new color
-				image_writer.setColor(z, x, color); // Write to the image at (z, y)
+				image_writer.setColor(x, z, color); // Write to the image at (z, y)
 			}
 		}
 	}

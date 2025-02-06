@@ -28,6 +28,8 @@ public class test extends Application {
 	int currXSlice=128;
 	int currYSlice=128;
 
+	int currMIPZSlice=128;
+
     @Override
     public void start(Stage stage) throws FileNotFoundException {
 		stage.setTitle("CThead Viewer");
@@ -46,9 +48,14 @@ public class test extends Application {
 		WritableImage sliceXImage = new WritableImage(256, 256); //allocate memory for the image
 		WritableImage sliceYImage = new WritableImage(256, 256); //allocate memory for the image
 
+		WritableImage sliceMIPZImage = new WritableImage(256, 256); //allocate memory for the image
+
+
 		GetZSlice(currZSlice, sliceZImage); //make the image - in this case go get the slice and copy it into the image
 		GetXSlice(currXSlice, sliceXImage);
 		GetYSlice(currYSlice, sliceYImage);
+
+		GetZMIP(currMIPZSlice,sliceMIPZImage);
 		//2. We link a view in the GUI to that image
 		ImageView sliceXView = new ImageView(sliceZImage); //and then see 3. below
 		ImageView sliceYView = new ImageView(sliceXImage);
@@ -60,10 +67,20 @@ public class test extends Application {
 		GetZMIP(MIPZImage);
 		ImageView MIPZView = new ImageView(MIPZImage);
 
+//		WritableImage MIPXImage = new WritableImage(256, 256);
+//		GetXMIP(MIPXImage);
+//		ImageView MIPXView = new ImageView(MIPXImage);
+//
+//		WritableImage MIPYImage = new WritableImage(256, 256);
+//		GetZMIP(MIPYImage);
+//		ImageView MIPYView = new ImageView(MIPZImage);
+
 		//Create the simple GUI
 		Slider sliceZSlider = new Slider(0, 255, currZSlice);
 		Slider sliceXSlider = new Slider(0, 255, currXSlice);
 		Slider sliceYSlider = new Slider(0, 255, currYSlice);
+
+		Slider sliceMIPZSlider = new Slider(0, 255, currMIPZSlice);
 
 
 		sliceZSlider.valueProperty().addListener(new ChangeListener<Number>() { 
@@ -190,6 +207,7 @@ public class test extends Application {
 			}
 		}
 	}
+
 	// Method to extract a slice along the X-axis
 	public void GetXSlice(int slice, WritableImage image) {
 		// Find the width and height of the image to be processed

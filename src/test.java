@@ -12,8 +12,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.Scene;
 import javafx.scene.layout.*;
 import javafx.scene.control.Slider;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;  
+import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.paint.Color;
@@ -28,7 +27,6 @@ public class test extends Application {
 	int currXSlice=128;
 	int currYSlice=128;
 
-	int currMIPZSlice=128;
 
     @Override
     public void start(Stage stage) throws FileNotFoundException {
@@ -48,14 +46,12 @@ public class test extends Application {
 		WritableImage sliceXImage = new WritableImage(256, 256); //allocate memory for the image
 		WritableImage sliceYImage = new WritableImage(256, 256); //allocate memory for the image
 
-		WritableImage sliceMIPZImage = new WritableImage(256, 256); //allocate memory for the image
 
 
 		GetZSlice(currZSlice, sliceZImage); //make the image - in this case go get the slice and copy it into the image
 		GetXSlice(currXSlice, sliceXImage);
 		GetYSlice(currYSlice, sliceYImage);
 
-		GetZMIP(currMIPZSlice,sliceMIPZImage);
 		//2. We link a view in the GUI to that image
 		ImageView sliceXView = new ImageView(sliceZImage); //and then see 3. below
 		ImageView sliceYView = new ImageView(sliceXImage);
@@ -67,20 +63,19 @@ public class test extends Application {
 		GetZMIP(MIPZImage);
 		ImageView MIPZView = new ImageView(MIPZImage);
 
-//		WritableImage MIPXImage = new WritableImage(256, 256);
-//		GetXMIP(MIPXImage);
-//		ImageView MIPXView = new ImageView(MIPXImage);
-//
-//		WritableImage MIPYImage = new WritableImage(256, 256);
-//		GetZMIP(MIPYImage);
-//		ImageView MIPYView = new ImageView(MIPZImage);
+		WritableImage MIPXImage = new WritableImage(256, 256);
+		GetXMIP(MIPXImage);
+		ImageView MIPXView = new ImageView(MIPXImage);
+
+		WritableImage MIPYImage = new WritableImage(256, 256);
+		GetYMIP(MIPYImage);
+		ImageView MIPYView = new ImageView(MIPYImage);
 
 		//Create the simple GUI
 		Slider sliceZSlider = new Slider(0, 255, currZSlice);
 		Slider sliceXSlider = new Slider(0, 255, currXSlice);
 		Slider sliceYSlider = new Slider(0, 255, currYSlice);
 
-		Slider sliceMIPZSlider = new Slider(0, 255, currMIPZSlice);
 
 
 		sliceZSlider.valueProperty().addListener(new ChangeListener<Number>() { 
@@ -90,7 +85,6 @@ public class test extends Application {
 				currZSlice = newValue.intValue();
 				//We update our Image
 		        GetZSlice(currZSlice, sliceZImage); //go get the slice image
-
 				//Because sliceZView (an ImageView) is linked to it, this will automatically update the displayed image in the GUI
             } 
         });
@@ -102,7 +96,7 @@ public class test extends Application {
 				currXSlice = newValue.intValue();
 				//We update our Image
 				GetXSlice(currXSlice, sliceXImage);
-				//Because sliceZView (an ImageView) is linked to it, this will automatically update the displayed image in the GUI
+				//Because sliceXView (an ImageView) is linked to it, this will automatically update the displayed image in the GUI
 			}
 		});
 
@@ -113,7 +107,7 @@ public class test extends Application {
 				currYSlice = newValue.intValue();
 				//We update our Image
 				GetYSlice(currYSlice, sliceYImage);
-				//Because sliceZView (an ImageView) is linked to it, this will automatically update the displayed image in the GUI
+				//Because sliceYView (an ImageView) is linked to it, this will automatically update the displayed image in the GUI
 			}
 		});
 
@@ -133,7 +127,9 @@ public class test extends Application {
 		grid.add(sliceXView, 0, 1); // Slider at column 0, row 1
 		grid.add(sliceYView,2,1);
 		grid.add(sliceZView,4,1);
-		grid.add(MIPZView, 0, 2); // Slider at column 0, row 1
+		grid.add(MIPZView, 0, 2);
+//		grid.add(MIPXView,1,2);
+//		grid.add(MIPYView,1,3);
 		
 
 		// Create a scene and set the stage
@@ -187,25 +183,47 @@ public class test extends Application {
 		//and grey is 0-1 float data that can be displayed by Java
 	}
 
-	public void GetZMIP(WritableImage image) {
-		//Find the width and height of the image to be process
-		int width = (int)image.getWidth();
-        int height = (int)image.getHeight();
 
-		//Get an interface to write to that image memory
+	public void GetZMIP(WritableImage image) {
+		// Find the width and height of the image to be processed
+		int width = (int) image.getWidth();
+		int height = (int) image.getHeight();
+
+		// Get an interface to write to the image memory
 		PixelWriter image_writer = image.getPixelWriter();
 
+		// Iterate over all pixels in the 2D plane (x, y)
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
-				//Implement MIP here
-				
-				//But I'll just make a white colour and copy it into the image
-				Color color=Color.color(1.0, 1.0, 1.0);
-				
-				//Apply the new colour
+				// Initialize the maximum intensity value for this (x, y) position
+				float maxIntensity = 0.0f;
+
+				// Iterate through all slices along the Z-axis
+				for (int z = 0; z < grey.length; z++) {
+					// Get the intensity value at (z, y, x)
+					float intensity = grey[z][y][x];
+
+					// Update the maximum intensity if the current intensity is greater
+					if (intensity > maxIntensity) {
+						maxIntensity = intensity;
+					}
+				}
+
+				// Create a grayscale color using the maximum intensity
+				Color color = Color.color(maxIntensity, maxIntensity, maxIntensity);
+
+				// Apply the new color to the image
 				image_writer.setColor(x, y, color);
 			}
 		}
+	}
+
+	public void GetXMIP(WritableImage image) {
+		//implement
+	}
+
+	public void GetYMIP(WritableImage image) {
+		//implement
 	}
 
 	// Method to extract a slice along the X-axis

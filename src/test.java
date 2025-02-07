@@ -53,9 +53,9 @@ public class test extends Application {
 		GetYSlice(currYSlice, sliceYImage);
 
 		//2. We link a view in the GUI to that image
-		ImageView sliceXView = new ImageView(sliceZImage); //and then see 3. below
-		ImageView sliceYView = new ImageView(sliceXImage);
-		ImageView sliceZView = new ImageView(sliceYImage);
+		ImageView sliceZView = new ImageView(sliceZImage); //and then see 3. below
+		ImageView sliceXView = new ImageView(sliceXImage);
+		ImageView sliceYView = new ImageView(sliceYImage);
 
 
 		// Do the same for MIP
@@ -85,7 +85,7 @@ public class test extends Application {
 				currZSlice = newValue.intValue();
 				//We update our Image
 		        GetZSlice(currZSlice, sliceZImage); //go get the slice image
-				//Because sliceZView (an ImageView) is linked to it, this will automatically update the displayed image in the GUI
+				//Because sliceYView (an ImageView) is linked to it, this will automatically update the displayed image in the GUI
             } 
         });
 
@@ -96,7 +96,7 @@ public class test extends Application {
 				currXSlice = newValue.intValue();
 				//We update our Image
 				GetXSlice(currXSlice, sliceXImage);
-				//Because sliceXView (an ImageView) is linked to it, this will automatically update the displayed image in the GUI
+				//Because sliceYView (an ImageView) is linked to it, this will automatically update the displayed image in the GUI
 			}
 		});
 
@@ -107,7 +107,7 @@ public class test extends Application {
 				currYSlice = newValue.intValue();
 				//We update our Image
 				GetYSlice(currYSlice, sliceYImage);
-				//Because sliceYView (an ImageView) is linked to it, this will automatically update the displayed image in the GUI
+				//Because sliceXView (an ImageView) is linked to it, this will automatically update the displayed image in the GUI
 			}
 		});
 
@@ -124,12 +124,12 @@ public class test extends Application {
 
         //3. (referring to the 3 things we need to display an image)
       	//we need to add it to the grid
-		grid.add(sliceXView, 0, 1); // Slider at column 0, row 1
-		grid.add(sliceYView,2,1);
-		grid.add(sliceZView,4,1);
+		grid.add(sliceZView, 0, 1); // Slider at column 0, row 1
+		grid.add(sliceXView,2,1);
+		grid.add(sliceYView,4,1);
 		grid.add(MIPZView, 0, 2);
-//		grid.add(MIPXView,1,2);
-//		grid.add(MIPYView,1,3);
+		grid.add(MIPXView,2,2);
+		grid.add(MIPYView,4,2);
 		
 
 		// Create a scene and set the stage
@@ -220,12 +220,77 @@ public class test extends Application {
 
 	public void GetXMIP(WritableImage image) {
 		//implement
+		// Find the width and height of the image to be processed
+		int width = (int) image.getWidth();
+		int height = (int) image.getHeight();
+
+		// Get an interface to write to the image memory
+		PixelWriter image_writer = image.getPixelWriter();
+
+		// Iterate over all pixels in the 2D plane (x, y)
+		for (int y = 0; y < height; y++) {
+			for (int z = 0; z < width; z++) {
+				// Initialize the maximum intensity value for this (x, y) position
+				float maxIntensity = 0.0f;
+
+				// Iterate through all slices along the Z-axis
+				for (int x = 0; x < grey.length; x++) {
+					// Get the intensity value at (z, y, x)
+					float intensity = grey[z][y][x];
+
+					// Update the maximum intensity if the current intensity is greater
+					if (intensity > maxIntensity) {
+						maxIntensity = intensity;
+					}
+				}
+
+				// Create a grayscale color using the maximum intensity
+				Color color = Color.color(maxIntensity, maxIntensity, maxIntensity);
+
+				// Apply the new color to the image
+				image_writer.setColor(y, z, color);
+			}
+		}
 	}
 
 	public void GetYMIP(WritableImage image) {
 		//implement
+		//implement
+		// Find the width and height of the image to be processed
+		int width = (int) image.getWidth();
+		int height = (int) image.getHeight();
+
+		// Get an interface to write to the image memory
+		PixelWriter image_writer = image.getPixelWriter();
+
+		// Iterate over all pixels in the 2D plane (x, y)
+		for (int x = 0; x < height; x++) {
+			for (int z = 0; z < width; z++) {
+				// Initialize the maximum intensity value for this (x, y) position
+				float maxIntensity = 0.0f;
+
+				// Iterate through all slices along the Z-axis
+				for (int y = 0; y < grey.length; y++) {
+					// Get the intensity value at (z, y, x)
+					float intensity = grey[z][y][x];
+
+					// Update the maximum intensity if the current intensity is greater
+					if (intensity > maxIntensity) {
+						maxIntensity = intensity;
+					}
+				}
+
+				// Create a grayscale color using the maximum intensity
+				Color color = Color.color(maxIntensity, maxIntensity, maxIntensity);
+
+				// Apply the new color to the image
+				image_writer.setColor(x, z, color);
+			}
+		}
 	}
 
+
+	
 	// Method to extract a slice along the X-axis
 	public void GetXSlice(int slice, WritableImage image) {
 		// Find the width and height of the image to be processed

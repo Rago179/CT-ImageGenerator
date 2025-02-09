@@ -254,8 +254,7 @@ public class test extends Application {
 	}
 
 	public void GetYMIP(WritableImage image) {
-		//implement
-		//implement
+
 		// Find the width and height of the image to be processed
 		int width = (int) image.getWidth();
 		int height = (int) image.getHeight();

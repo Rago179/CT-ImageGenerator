@@ -138,14 +138,15 @@ public class test extends Application {
 		//Add all the GUI elements
 		//I'll start a grid for you
 		GridPane grid = new GridPane();
-        grid.add(sliceZSlider, 0, 0); // Slider at column 0, row 0
-		grid.add(sliceXSlider,2,0);
-		grid.add(sliceYSlider,4,0);
+		grid.add(sliceXSlider,0,0);
+		grid.add(sliceYSlider,2,0);
+		grid.add(sliceZSlider, 4, 0); // Slider at column 0, row 0
 
-		grid.add(volumeRenderedViewZ, 0, 4);
-		grid.add(volumeRenderedViewX, 2, 4);
-		grid.add(volumeRenderedViewY, 4, 4);
 		grid.add(skinOpacitySlider, 2, 5);
+
+		grid.add(volumeRenderedViewX, 0, 4);
+		grid.add(volumeRenderedViewY, 2, 4);
+		grid.add(volumeRenderedViewZ, 4, 4);
 
 
 		grid.setHgap(10);
@@ -153,13 +154,14 @@ public class test extends Application {
 
         //3. (referring to the 3 things we need to display an image)
       	//we need to add it to the grid
-		grid.add(sliceZView, 0, 1); // Slider at column 0, row 1
-		grid.add(sliceXView,2,1);
-		grid.add(sliceYView,4,1);
-		grid.add(MIPZView, 0, 2);
-		grid.add(MIPXView,2,2);
-		grid.add(MIPYView,4,2);
-		
+		grid.add(sliceXView,0,1);
+		grid.add(sliceYView,2,1);
+		grid.add(sliceZView, 4, 1); // Slider at column 0, row 1
+
+		grid.add(MIPXView,0,2);
+		grid.add(MIPYView,2,2);
+		grid.add(MIPZView, 4, 2);
+
 
 		// Create a scene and set the stage
         Scene scene = new Scene(grid, 800, 840);
@@ -218,11 +220,11 @@ public class test extends Application {
 	}
 
 	private void VolumeRenderX(WritableImage image) {
-		renderVolume(image, 256, 256, (x, y, z) -> cthead[y][z][x]);
+		renderVolume(image, 256, 256, (x, y, z) -> cthead[y][x][z]);
 	}
 
 	private void VolumeRenderY(WritableImage image) {
-		renderVolume(image, 256, 256, (x, y, z) -> cthead[y][x][z]);
+		renderVolume(image, 256, 256, (x, y, z) -> cthead[y][z][x]);
 	}
 
 
@@ -263,11 +265,11 @@ public class test extends Application {
 	}
 
 	public void GetXMIP(WritableImage image) {
-		GetMIP(image, (int) image.getWidth(), (int) image.getHeight(), (x, y, z) -> grey[z][y][x]);
+		GetMIP(image, (int) image.getWidth(), (int) image.getHeight(), (x, y, z) -> grey[y][x][z]);
 	}
 
 	public void GetYMIP(WritableImage image) {
-		GetMIP(image, (int) image.getWidth(), (int) image.getHeight(), (x, y, z) -> grey[z][y][x]);
+		GetMIP(image, (int) image.getWidth(), (int) image.getHeight(), (x, y, z) -> grey[y][z][x]);
 	}
 
 	private void GetMIP(WritableImage image, int width, int height, IntensityFetcher fetcher) {
@@ -301,15 +303,15 @@ public class test extends Application {
 	}
 
 	public void GetXSlice(int slice, WritableImage image) {
-		GetSlice(image, (int) image.getWidth(), (int) image.getHeight(), slice, (x, y, s) -> grey[y][s][x]);
+		GetSlice(image, (int) image.getWidth(), (int) image.getHeight(), slice, (x, y, z) -> grey[y][x][z]);
 	}
 
 	public void GetYSlice(int slice, WritableImage image) {
-		GetSlice(image, (int) image.getWidth(), (int) image.getHeight(), slice, (x, y, s) -> grey[y][s][x]);
+		GetSlice(image, (int) image.getWidth(), (int) image.getHeight(), slice, (x, y, z) -> grey[y][z][x]);
 	}
 
 	public void GetZSlice(int slice, WritableImage image) {
-		GetSlice(image, (int) image.getWidth(), (int) image.getHeight(), slice, (x, y, s) -> grey[s][y][x]);
+		GetSlice(image, (int) image.getWidth(), (int) image.getHeight(), slice, (x, y, z) -> grey[z][y][x]);
 	}
 
 

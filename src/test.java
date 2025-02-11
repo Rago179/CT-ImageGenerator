@@ -22,6 +22,7 @@ public class test extends Application {
 	short cthead[][][]; //store the 3D volume data set
 	float grey[][][]; //store the 3D volume data set converted to 0-1 ready to copy to the image
 	short min, max; //min/max value in the 3D volume data set
+	private double skinOpacity = 0.12;
 
 	int currZSlice=128;
 	int currXSlice=128;
@@ -47,6 +48,10 @@ public class test extends Application {
 		WritableImage sliceYImage = new WritableImage(256, 256); //allocate memory for the image
 
 
+		WritableImage volumeRenderedZ = new WritableImage(256, 256);
+		WritableImage volumeRenderedX = new WritableImage(256, 256);
+		WritableImage volumeRenderedY = new WritableImage(256, 256);
+
 
 		GetZSlice(currZSlice, sliceZImage); //make the image - in this case go get the slice and copy it into the image
 		GetXSlice(currXSlice, sliceXImage);
@@ -56,6 +61,15 @@ public class test extends Application {
 		ImageView sliceZView = new ImageView(sliceZImage); //and then see 3. below
 		ImageView sliceXView = new ImageView(sliceXImage);
 		ImageView sliceYView = new ImageView(sliceYImage);
+
+
+		ImageView volumeRenderedViewZ = new ImageView(volumeRenderedZ);
+		ImageView volumeRenderedViewX = new ImageView(volumeRenderedX);
+		ImageView volumeRenderedViewY = new ImageView(volumeRenderedY);
+
+		VolumeRenderZ(volumeRenderedZ);
+		VolumeRenderX(volumeRenderedX);
+		VolumeRenderY(volumeRenderedY);
 
 
 		// Do the same for MIP
@@ -75,6 +89,8 @@ public class test extends Application {
 		Slider sliceZSlider = new Slider(0, 255, currZSlice);
 		Slider sliceXSlider = new Slider(0, 255, currXSlice);
 		Slider sliceYSlider = new Slider(0, 255, currYSlice);
+
+		Slider skinOpacitySlider = new Slider(0, 100, skinOpacity * 100);
 
 
 
@@ -111,6 +127,13 @@ public class test extends Application {
 			}
 		});
 
+		skinOpacitySlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+			skinOpacity = newVal.doubleValue() / 100.0;
+			VolumeRenderZ(volumeRenderedZ);
+			VolumeRenderX(volumeRenderedX);
+			VolumeRenderY(volumeRenderedY);
+		});
+
 
 		//Add all the GUI elements
 		//I'll start a grid for you
@@ -118,6 +141,12 @@ public class test extends Application {
         grid.add(sliceZSlider, 0, 0); // Slider at column 0, row 0
 		grid.add(sliceXSlider,2,0);
 		grid.add(sliceYSlider,4,0);
+
+		grid.add(volumeRenderedViewZ, 0, 4);
+		grid.add(volumeRenderedViewX, 2, 4);
+		grid.add(volumeRenderedViewY, 4, 4);
+		grid.add(skinOpacitySlider, 2, 5);
+
 
 		grid.setHgap(10);
         grid.setVgap(10);
@@ -181,6 +210,51 @@ public class test extends Application {
 		}
 		//At this point, cthead is the original dataset
 		//and grey is 0-1 float data that can be displayed by Java
+	}
+
+
+	private void VolumeRenderZ(WritableImage image) {
+		renderVolume(image, 256, 256, (x, y, z) -> cthead[z][y][x]);
+	}
+
+	private void VolumeRenderX(WritableImage image) {
+		renderVolume(image, 256, 256, (x, y, z) -> cthead[y][z][x]);
+	}
+
+	private void VolumeRenderY(WritableImage image) {
+		renderVolume(image, 256, 256, (x, y, z) -> cthead[y][x][z]);
+	}
+
+
+	private void renderVolume(WritableImage image, int width, int height, VoxelFetcher fetcher) {
+		PixelWriter writer = image.getPixelWriter();
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				double opacity = 0;
+				double[] color = {0, 0, 0};
+
+				for (int z = 0; z < 256; z++) {
+					short value = fetcher.fetch(x, y, z);
+					double[] tf = getTransferFunction(value);
+
+					double voxelOpacity = tf[3];
+					for (int c = 0; c < 3; c++) {
+						color[c] += voxelOpacity * tf[c] * (1 - opacity);
+					}
+					opacity += voxelOpacity * (1 - opacity);
+					if (opacity > 0.99) break;
+				}
+				writer.setColor(x, y, Color.color(color[0], color[1], color[2]));
+			}
+		}
+	}
+
+	private double[] getTransferFunction(short value) {
+		if (value < -300) return new double[]{0, 0, 0, 0};
+		if (value >= -300 && value <= 49) return new double[]{0.82, 0.49, 0.18, skinOpacity};
+		if (value >= 50 && value <= 299) return new double[]{0, 0, 0, 0};
+		return new double[]{1.0, 1.0, 1.0, 0.8};
 	}
 
 
@@ -370,5 +444,9 @@ public class test extends Application {
     public static void main(String[] args) {
         launch();
     }
-
+	@FunctionalInterface
+	interface VoxelFetcher {
+		short fetch(int x, int y, int z);
+	}
 }
+

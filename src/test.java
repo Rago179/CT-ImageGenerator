@@ -226,6 +226,7 @@ public class test extends Application {
 	}
 
 
+
 	private void renderVolume(WritableImage image, int width, int height, VoxelFetcher fetcher) {
 		PixelWriter writer = image.getPixelWriter();
 
@@ -257,16 +258,24 @@ public class test extends Application {
 		return new double[]{1.0, 1.0, 1.0, 0.8};
 	}
 
-
 	public void GetZMIP(WritableImage image) {
+		GetMIP(image, (int) image.getWidth(), (int) image.getHeight(), (x, y, z) -> grey[z][y][x]);
+	}
+
+	public void GetXMIP(WritableImage image) {
+		GetMIP(image, (int) image.getWidth(), (int) image.getHeight(), (x, y, z) -> grey[z][y][x]);
+	}
+
+	public void GetYMIP(WritableImage image) {
+		GetMIP(image, (int) image.getWidth(), (int) image.getHeight(), (x, y, z) -> grey[z][y][x]);
+	}
+
+	private void GetMIP(WritableImage image, int width, int height, IntensityFetcher fetcher) {
 		// Find the width and height of the image to be processed
-		int width = (int) image.getWidth();
-		int height = (int) image.getHeight();
 
 		// Get an interface to write to the image memory
-		PixelWriter image_writer = image.getPixelWriter();
-
-		// Iterate over all pixels in the 2D plane (x, y)
+		PixelWriter imageWriter = image.getPixelWriter();
+// Iterate over all pixels in the 2D plane (x, y)
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				// Initialize the maximum intensity value for this (x, y) position
@@ -275,7 +284,7 @@ public class test extends Application {
 				// Iterate through all slices along the Z-axis
 				for (int z = 0; z < grey.length; z++) {
 					// Get the intensity value at (z, y, x)
-					float intensity = grey[z][y][x];
+					float intensity = fetcher.fetch(x, y, z);
 
 					// Update the maximum intensity if the current intensity is greater
 					if (intensity > maxIntensity) {
@@ -285,168 +294,54 @@ public class test extends Application {
 
 				// Create a grayscale color using the maximum intensity
 				Color color = Color.color(maxIntensity, maxIntensity, maxIntensity);
-
 				// Apply the new color to the image
-				image_writer.setColor(x, y, color);
+				imageWriter.setColor(x, y, color);
 			}
 		}
 	}
 
-	public void GetXMIP(WritableImage image) {
-		//implement
-		// Find the width and height of the image to be processed
-		int width = (int) image.getWidth();
-		int height = (int) image.getHeight();
-
-		// Get an interface to write to the image memory
-		PixelWriter image_writer = image.getPixelWriter();
-
-		// Iterate over all pixels in the 2D plane (x, y)
-		for (int y = 0; y < height; y++) {
-			for (int z = 0; z < width; z++) {
-				// Initialize the maximum intensity value for this (x, y) position
-				float maxIntensity = 0.0f;
-
-				// Iterate through all slices along the Z-axis
-				for (int x = 0; x < grey.length; x++) {
-					// Get the intensity value at (z, y, x)
-					float intensity = grey[z][y][x];
-
-					// Update the maximum intensity if the current intensity is greater
-					if (intensity > maxIntensity) {
-						maxIntensity = intensity;
-					}
-				}
-
-				// Create a grayscale color using the maximum intensity
-				Color color = Color.color(maxIntensity, maxIntensity, maxIntensity);
-
-				// Apply the new color to the image
-				image_writer.setColor(y, z, color);
-			}
-		}
-	}
-
-	public void GetYMIP(WritableImage image) {
-
-		// Find the width and height of the image to be processed
-		int width = (int) image.getWidth();
-		int height = (int) image.getHeight();
-
-		// Get an interface to write to the image memory
-		PixelWriter image_writer = image.getPixelWriter();
-
-		// Iterate over all pixels in the 2D plane (x, y)
-		for (int x = 0; x < height; x++) {
-			for (int z = 0; z < width; z++) {
-				// Initialize the maximum intensity value for this (x, y) position
-				float maxIntensity = 0.0f;
-
-				// Iterate through all slices along the Z-axis
-				for (int y = 0; y < grey.length; y++) {
-					// Get the intensity value at (z, y, x)
-					float intensity = grey[z][y][x];
-
-					// Update the maximum intensity if the current intensity is greater
-					if (intensity > maxIntensity) {
-						maxIntensity = intensity;
-					}
-				}
-
-				// Create a grayscale color using the maximum intensity
-				Color color = Color.color(maxIntensity, maxIntensity, maxIntensity);
-
-				// Apply the new color to the image
-				image_writer.setColor(x, z, color);
-			}
-		}
-	}
-
-
-	
-	// Method to extract a slice along the X-axis
 	public void GetXSlice(int slice, WritableImage image) {
-		// Find the width and height of the image to be processed
-		int width = (int) image.getWidth();
-		int height = (int) image.getHeight();
-		float val;
-
-		// Get an interface to write to that image memory
-		PixelWriter image_writer = image.getPixelWriter();
-
-		// Iterate over all pixels
-		for (int z = 0; z < height; z++) {
-			for (int y = 0; y < width; y++) { // 'z' represents the depth axis here
-				// Extract the value from the grey array at the specified X-slice
-				val = grey[z][y][slice]; // Fixed 'slice' as the X-coordinate
-
-				// Create a grayscale color
-				Color color = Color.color(val, val, val);
-
-				// Apply the new color
-				image_writer.setColor(y, z, color); // Write to the image at (z, y)
-			}
-		}
+		GetSlice(image, (int) image.getWidth(), (int) image.getHeight(), slice, (x, y, s) -> grey[y][s][x]);
 	}
 
-	// Method to extract a slice along the X-axis
 	public void GetYSlice(int slice, WritableImage image) {
-		// Find the width and height of the image to be processed
-		int width = (int) image.getWidth();
-		int height = (int) image.getHeight();
-		float val;
-
-		// Get an interface to write to that image memory
-		PixelWriter image_writer = image.getPixelWriter();
-
-		// Iterate over all pixels
-		for (int z = 0; z < height; z++) {
-			for (int x = 0; x < width; x++) { // 'z' represents the depth axis here
-				// Extract the value from the grey array at the specified X-slice
-				val = grey[z][slice][x]; // Fixed 'slice' as the X-coordinate
-
-				// Create a grayscale color
-				Color color = Color.color(val, val, val);
-
-				// Apply the new color
-				image_writer.setColor(x, z, color); // Write to the image at (z, y)
-			}
-		}
+		GetSlice(image, (int) image.getWidth(), (int) image.getHeight(), slice, (x, y, s) -> grey[y][s][x]);
 	}
 
 	public void GetZSlice(int slice, WritableImage image) {
-		//Find the width and height of the image to be process
-		int width = (int)image.getWidth();
-        int height = (int)image.getHeight();
-		float val;
+		GetSlice(image, (int) image.getWidth(), (int) image.getHeight(), slice, (x, y, s) -> grey[s][y][x]);
+	}
 
-		//Get an interface to write to that image memory
-		PixelWriter image_writer = image.getPixelWriter();
 
-		//Iterate over all pixels
+	// Method to extract a slice along the X-axis
+	private void GetSlice(WritableImage image, int width, int height, int slice, IntensityFetcher fetcher) {
+		// Find the width and height of the image to be processed
+		PixelWriter imageWriter = image.getPixelWriter();
+		// Get an interface to write to that image memory
+		// Iterate over all pixels
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
-				//I'm going to get the middle slice as an example
-				val = grey[slice][y][x];
-
-				//Or uncomment this to make a grey image dependent on the slider value so you can see how the GUI updates
-				//val = (float) slice / 255.f;
-
-				Color color=Color.color(val, val, val);
-				//Apply the new colour
-				image_writer.setColor(x, y, color);
+				// Extract the value from the grey array at the specified X-slice
+				float val = fetcher.fetch(x, y, slice);
+				// Create a grayscale color
+				Color color = Color.color(val, val, val);
+				// Apply the new color
+				imageWriter.setColor(x, y, color);
 			}
 		}
 	}
-	
 
-	
     public static void main(String[] args) {
         launch();
     }
 	@FunctionalInterface
 	interface VoxelFetcher {
 		short fetch(int x, int y, int z);
+	}
+
+	@FunctionalInterface
+	private interface IntensityFetcher {
+		float fetch(int x, int y, int z);
 	}
 }
 

@@ -234,19 +234,20 @@ public class test extends Application {
 
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
-				double opacity = 0;
+				double accumulatedOpacity = 0;
 				double[] color = {0, 0, 0};
 
+				//catches depth and color details using transfer function and color contribution and accumulated opacity.
 				for (int z = 0; z < 256; z++) {
 					short value = fetcher.fetch(x, y, z);
 					double[] tf = getTransferFunction(value);
 
 					double voxelOpacity = tf[3];
 					for (int c = 0; c < 3; c++) {
-						color[c] += voxelOpacity * tf[c] * (1 - opacity);
+						color[c] += voxelOpacity * tf[c] * (1 - accumulatedOpacity);
 					}
-					opacity += voxelOpacity * (1 - opacity);
-					if (opacity > 0.99) break;
+					accumulatedOpacity += voxelOpacity * (1 - accumulatedOpacity);
+					if (accumulatedOpacity > 0.99) break; //completely opaque
 				}
 				writer.setColor(x, y, Color.color(color[0], color[1], color[2]));
 			}
@@ -254,9 +255,11 @@ public class test extends Application {
 	}
 
 	private double[] getTransferFunction(short value) {
+		//RGB + Opacity
 		if (value < -300) return new double[]{0, 0, 0, 0};
 		if (value >= -300 && value <= 49) return new double[]{0.82, 0.49, 0.18, skinOpacity};
 		if (value >= 50 && value <= 299) return new double[]{0, 0, 0, 0};
+		//if CT values exceed 300
 		return new double[]{1.0, 1.0, 1.0, 0.8};
 	}
 
@@ -277,7 +280,7 @@ public class test extends Application {
 
 		// Get an interface to write to the image memory
 		PixelWriter imageWriter = image.getPixelWriter();
-// Iterate over all pixels in the 2D plane (x, y)
+		// Iterate over all pixels in the 2D plane (x, y)
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				// Initialize the maximum intensity value for this (x, y) position

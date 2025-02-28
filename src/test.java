@@ -47,20 +47,15 @@ public class test extends Application {
 		WritableImage sliceXImage = new WritableImage(256, 256); //allocate memory for the image
 		WritableImage sliceYImage = new WritableImage(256, 256); //allocate memory for the image
 
-		// Do the same for MIP
-		WritableImage MIPZImage = new WritableImage(256, 256);
-		WritableImage MIPXImage = new WritableImage(256, 256);
-		WritableImage MIPYImage = new WritableImage(256, 256);
-
 
 		WritableImage volumeRenderedZ = new WritableImage(256, 256);
 		WritableImage volumeRenderedX = new WritableImage(256, 256);
 		WritableImage volumeRenderedY = new WritableImage(256, 256);
 
 
-		getZSlice(currZSlice, sliceZImage); //make the image - in this case go get the slice and copy it into the image
-		getXSlice(currXSlice, sliceXImage);
-		getYSlice(currYSlice, sliceYImage);
+		GetZSlice(currZSlice, sliceZImage); //make the image - in this case go get the slice and copy it into the image
+		GetXSlice(currXSlice, sliceXImage);
+		GetYSlice(currYSlice, sliceYImage);
 
 		//2. We link a view in the GUI to that image
 		ImageView sliceZView = new ImageView(sliceZImage); //and then see 3. below
@@ -68,25 +63,27 @@ public class test extends Application {
 		ImageView sliceYView = new ImageView(sliceYImage);
 
 
-
-		getZMIP(MIPZImage);
-		getYMIP(MIPYImage);
-		getXMIP(MIPXImage);
-
-		ImageView MIPZView = new ImageView(MIPZImage);
-		ImageView MIPXView = new ImageView(MIPXImage);
-		ImageView MIPYView = new ImageView(MIPYImage);
-
-
-		getVolumeRenderZ(volumeRenderedZ);
-		getVolumeRenderX(volumeRenderedX);
-		getVolumeRenderY(volumeRenderedY);
-
 		ImageView volumeRenderedViewZ = new ImageView(volumeRenderedZ);
 		ImageView volumeRenderedViewX = new ImageView(volumeRenderedX);
 		ImageView volumeRenderedViewY = new ImageView(volumeRenderedY);
 
+		VolumeRenderZ(volumeRenderedZ);
+		VolumeRenderX(volumeRenderedX);
+		VolumeRenderY(volumeRenderedY);
 
+
+		// Do the same for MIP
+		WritableImage MIPZImage = new WritableImage(256, 256);
+		GetZMIP(MIPZImage);
+		ImageView MIPZView = new ImageView(MIPZImage);
+
+		WritableImage MIPXImage = new WritableImage(256, 256);
+		GetXMIP(MIPXImage);
+		ImageView MIPXView = new ImageView(MIPXImage);
+
+		WritableImage MIPYImage = new WritableImage(256, 256);
+		GetYMIP(MIPYImage);
+		ImageView MIPYView = new ImageView(MIPYImage);
 
 		//Create the simple GUI
 		Slider sliceZSlider = new Slider(0, 255, currZSlice);
@@ -103,7 +100,7 @@ public class test extends Application {
 
 				currZSlice = newValue.intValue();
 				//We update our Image
-		        getZSlice(currZSlice, sliceZImage); //go get the slice image
+		        GetZSlice(currZSlice, sliceZImage); //go get the slice image
 				//Because sliceYView (an ImageView) is linked to it, this will automatically update the displayed image in the GUI
             } 
         });
@@ -114,7 +111,7 @@ public class test extends Application {
 
 				currXSlice = newValue.intValue();
 				//We update our Image
-				getXSlice(currXSlice, sliceXImage);
+				GetXSlice(currXSlice, sliceXImage);
 				//Because sliceYView (an ImageView) is linked to it, this will automatically update the displayed image in the GUI
 			}
 		});
@@ -125,16 +122,16 @@ public class test extends Application {
 
 				currYSlice = newValue.intValue();
 				//We update our Image
-				getYSlice(currYSlice, sliceYImage);
+				GetYSlice(currYSlice, sliceYImage);
 				//Because sliceXView (an ImageView) is linked to it, this will automatically update the displayed image in the GUI
 			}
 		});
 
 		skinOpacitySlider.valueProperty().addListener((obs, oldVal, newVal) -> {
 			skinOpacity = newVal.doubleValue() / 100.0;
-			getVolumeRenderZ(volumeRenderedZ);
-			getVolumeRenderX(volumeRenderedX);
-			getVolumeRenderY(volumeRenderedY);
+			VolumeRenderZ(volumeRenderedZ);
+			VolumeRenderX(volumeRenderedX);
+			VolumeRenderY(volumeRenderedY);
 		});
 
 
@@ -147,6 +144,9 @@ public class test extends Application {
 
 		grid.add(skinOpacitySlider, 2, 5);
 
+		grid.add(volumeRenderedViewX, 0, 4);
+		grid.add(volumeRenderedViewY, 2, 4);
+		grid.add(volumeRenderedViewZ, 4, 4);
 
 
 		grid.setHgap(10);
@@ -162,10 +162,6 @@ public class test extends Application {
 		grid.add(MIPYView,2,2);
 		grid.add(MIPZView, 4, 2);
 
-
-		grid.add(volumeRenderedViewX, 0, 4);
-		grid.add(volumeRenderedViewY, 2, 4);
-		grid.add(volumeRenderedViewZ, 4, 4);
 
 		// Create a scene and set the stage
         Scene scene = new Scene(grid, 800, 840);
@@ -219,15 +215,15 @@ public class test extends Application {
 	}
 
 
-	private void getVolumeRenderZ(WritableImage image) {
+	private void VolumeRenderZ(WritableImage image) {
 		renderVolume(image, 256, 256, (x, y, z) -> cthead[z][y][x]);
 	}
 
-	private void getVolumeRenderX(WritableImage image) {
+	private void VolumeRenderX(WritableImage image) {
 		renderVolume(image, 256, 256, (x, y, z) -> cthead[y][x][z]);
 	}
 
-	private void getVolumeRenderY(WritableImage image) {
+	private void VolumeRenderY(WritableImage image) {
 		renderVolume(image, 256, 256, (x, y, z) -> cthead[y][z][x]);
 	}
 
@@ -267,15 +263,15 @@ public class test extends Application {
 		return new double[]{1.0, 1.0, 1.0, 0.8};
 	}
 
-	public void getZMIP(WritableImage image) {
+	public void GetZMIP(WritableImage image) {
 		GetMIP(image, (int) image.getWidth(), (int) image.getHeight(), (x, y, z) -> grey[z][y][x]);
 	}
 
-	public void getXMIP(WritableImage image) {
+	public void GetXMIP(WritableImage image) {
 		GetMIP(image, (int) image.getWidth(), (int) image.getHeight(), (x, y, z) -> grey[y][x][z]);
 	}
 
-	public void getYMIP(WritableImage image) {
+	public void GetYMIP(WritableImage image) {
 		GetMIP(image, (int) image.getWidth(), (int) image.getHeight(), (x, y, z) -> grey[y][z][x]);
 	}
 
@@ -309,15 +305,15 @@ public class test extends Application {
 		}
 	}
 
-	public void getXSlice(int slice, WritableImage image) {
+	public void GetXSlice(int slice, WritableImage image) {
 		GetSlice(image, (int) image.getWidth(), (int) image.getHeight(), slice, (x, y, z) -> grey[y][x][z]);
 	}
 
-	public void getYSlice(int slice, WritableImage image) {
+	public void GetYSlice(int slice, WritableImage image) {
 		GetSlice(image, (int) image.getWidth(), (int) image.getHeight(), slice, (x, y, z) -> grey[y][z][x]);
 	}
 
-	public void getZSlice(int slice, WritableImage image) {
+	public void GetZSlice(int slice, WritableImage image) {
 		GetSlice(image, (int) image.getWidth(), (int) image.getHeight(), slice, (x, y, z) -> grey[z][y][x]);
 	}
 

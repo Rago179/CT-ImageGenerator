@@ -219,9 +219,6 @@ public class test extends Application {
 	}
 
 
-	private void getVolumeRenderZ(WritableImage image) {
-		renderVolume(image, 256, 256, (x, y, z) -> cthead[z][y][x]);
-	}
 
 	private void getVolumeRenderX(WritableImage image) {
 		renderVolume(image, 256, 256, (x, y, z) -> cthead[y][x][z]);
@@ -230,6 +227,11 @@ public class test extends Application {
 	private void getVolumeRenderY(WritableImage image) {
 		renderVolume(image, 256, 256, (x, y, z) -> cthead[y][z][x]);
 	}
+	private void getVolumeRenderZ(WritableImage image) {
+		renderVolume(image, 256, 256, (x, y, z) -> cthead[z][y][x]);
+	}
+
+
 
 
 
@@ -267,16 +269,18 @@ public class test extends Application {
 		return new double[]{1.0, 1.0, 1.0, 0.8};
 	}
 
-	public void getZMIP(WritableImage image) {
-		GetMIP(image, (int) image.getWidth(), (int) image.getHeight(), (x, y, z) -> grey[z][y][x]);
-	}
+
 
 	public void getXMIP(WritableImage image) {
 		GetMIP(image, (int) image.getWidth(), (int) image.getHeight(), (x, y, z) -> grey[y][x][z]);
 	}
 
 	public void getYMIP(WritableImage image) {
-		GetMIP(image, (int) image.getWidth(), (int) image.getHeight(), (x, y, z) -> grey[y][z][x]);
+		GetMIP(image, (int) image.getHeight(), (int) image.getWidth(), (x, y, z) -> grey[y][z][x]);
+	}
+
+	public void getZMIP(WritableImage image) {
+		GetMIP(image, (int) image.getHeight(), (int) image.getWidth(), (x, y, z) -> grey[z][y][x]);
 	}
 
 	private void GetMIP(WritableImage image, int width, int height, IntensityFetcher fetcher) {
@@ -288,7 +292,7 @@ public class test extends Application {
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				// Initialize the maximum intensity value for this (x, y) position
-				float maxIntensity = 0.0f;
+				float maxIntensity = Float.NEGATIVE_INFINITY;
 
 				// Iterate through all slices along the Z-axis
 				for (int z = 0; z < grey.length; z++) {
@@ -312,11 +316,9 @@ public class test extends Application {
 	public void getXSlice(int slice, WritableImage image) {
 		GetSlice(image, (int) image.getWidth(), (int) image.getHeight(), slice, (x, y, z) -> grey[y][x][z]);
 	}
-
 	public void getYSlice(int slice, WritableImage image) {
 		GetSlice(image, (int) image.getWidth(), (int) image.getHeight(), slice, (x, y, z) -> grey[y][z][x]);
 	}
-
 	public void getZSlice(int slice, WritableImage image) {
 		GetSlice(image, (int) image.getWidth(), (int) image.getHeight(), slice, (x, y, z) -> grey[z][y][x]);
 	}
@@ -332,6 +334,7 @@ public class test extends Application {
 			for (int x = 0; x < width; x++) {
 				// Extract the value from the grey array at the specified X-slice
 				float val = fetcher.fetch(x, y, slice);
+//				float val = grey[x][y][slice];
 				// Create a grayscale color
 				Color color = Color.color(val, val, val);
 				// Apply the new color

@@ -1,10 +1,14 @@
 /*
+This assignment was submitted by:
+Omar Sanad - 2326373
+Ali El batran - 2374707
 CS-256 Getting started code for the assignment
 I do not give you permission to post this code online
 Do not copy code
 Do not use libraries to do the Slicing, MIP or Volume Rendering. That code must be written by yourself
 You may use libraries / IDE to achieve a better GUI
 */
+
 import java.io.*;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;

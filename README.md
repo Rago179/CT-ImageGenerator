@@ -1,0 +1,1 @@
+This project demonstrates my ability to visualize CT-scan data into images in different views and in moving through slices. I have also implemented the maximum intesity projection and volume rendering.
